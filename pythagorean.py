@@ -68,7 +68,6 @@ def frame_generator(verbose, tempo):
 
     # Generate two frames to use as keyframes.
     frame0 = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
-    # frame1[:,4:20,:] = colors[0]
 
     # Fill the frames with the first two colors.
    
@@ -76,13 +75,25 @@ def frame_generator(verbose, tempo):
     color1 = random_color()
     color2 = blend(color0, color1)
 
-    frame0[:,:,:] = (255,255,255)
-    frame0[:,0:12,:] = color0
-    frame1 = frame0
-    frame1[:,16:32,:] = color1
+  
     offset = 4
     pause = 0
     restart = False
+
+    side1 = 3
+    side2 = 4
+   
+
+    block1 = (side1*offset)
+
+
+    frame0[:,:,:] = (255,255,255)
+    frame0[:, 0:block1,:] = color0
+
+    frame1 = frame0
+    frame1[:,16:32,:] = color1
+
+    frame1[:,(block1 + offset):(block1 + offset + (side2 * offset)),:] = color1
     
     while True:
         # Cross-fade between successive key frames at the given tempo.  This will
@@ -98,29 +109,35 @@ def frame_generator(verbose, tempo):
 
             if (pause == 0 and restart):
                 frame0[:,:,:] = (255,255,255)
-                frame1[:, 0:32*offset,:] = (255,255,255)
+                frame1[:,:,:] = (255,255,255)
 
                 frame0[:,0:12,:] = color0
                 frame1 = frame0
                 frame1[:,16:32,:] = color1
 
-                print("here")
-
                 restart = False
 
-            
             if (pause == 10):
-                frame0[:,0:12*offset,:] = color0
-                frame1[:,(16 * offset):32*offset,:] = color1
+                squared1 = (side1 ** 2) * offset
+                squared2 = (side2 ** 2) * offset
+
+
+                frame0[:,0:squared1,:] = color0
+                frame1[:,(squared1 + offset):((squared1 + offset) + squared2), :] = color1
 
             
             if (pause == 20):
-                frame1[:, 0:32*offset,:] = color2
+                side3 = (side1 ** 2) + (side2 ** 2)
+                frame0[:,:,:] = (255,255,255)
+                frame1[:,:,:] = (255,255,255)
+                frame1[:, 0:side3*offset,:] = color2
 
 
             if (pause == 30):
-                frame1[:, 0:32*offset,:] = (255,255,255)
-                frame1[:, 0:20,:] = color2
+                side3 = int(side3 ** (1/2))
+                frame1[:,:,:] = (255,255,255)
+                frame1[:, 0:side3*offset,:] = color2
+
                 pause = 0
                 restart = True
 
