@@ -33,9 +33,18 @@ file_extension = 'avi'
 #================================================================
 # Define a set of colors as (B,G,R) triples of unsigned 8-bit integers.
 
-colors = ((24,134,240),      # yellow
-          (243,207,130),     # blue
+colors = ((255,255,255),      # white
+          (167,170,241),     # red
+          (173,201,244),     # orange
+          (177,219,242),      # yellow
+          (199,231,213),     # green
+          (229,211,183),     # blue
+          (234,184,183),     # purple
+          (219,163,226),     # pink
           )
+
+
+
 #================================================================
 # Generate successive frames of the video sequence.
 
@@ -48,7 +57,7 @@ def frame_generator(verbose, tempo):
     keyframe_phase = 0.0  # unit phase for the cross-fade, cycles over 0 to 1
 
     frame_interval = 1.0 / frame_rate                       # seconds between video frames
-    keyframe_interval = 10.0 / tempo                        # seconds between key frames
+    keyframe_interval = 5.0 / tempo                        # seconds between key frames
     keyframe_rate = 1.0 / (frame_rate * keyframe_interval)  # phase / frame
 
     # Generate two frames to use as keyframes.
@@ -57,11 +66,13 @@ def frame_generator(verbose, tempo):
 
     # Fill the frames with the first two colors.
    
-    frame0[:,0:4,:] = colors[0]
+    frame0[:] = colors[0]
     frame1 = frame0
-    frame1[:,4:8,:] = colors[1]
-    offset = 4
+    frame1[:,0:4,:] = colors[1]
+    square = 1
+    offset = 0
     squared = False
+    pause = 0
     
     while True:
         # Cross-fade between successive key frames at the given tempo.  This will
@@ -74,17 +85,23 @@ def frame_generator(verbose, tempo):
         # Once the second keyframe is reached, generate the successor and reset the fade.
         if keyframe_phase >= 1.0:
             keyframe_phase -= 1.0
-            frame0 = frame1
             if (squared):
-              squared = False
-              frame1[:,offset:offset+4,:] = colors[1]
+              pause -= 1
+              if (pause == 0):
+                frame0 = frame1
+                squared = False
+                square += 1
+                frame1[:,offset:offset+4,:] = colors[square % 8]
             elif (isSquare(count+2)):
-              frame1[:,0:offset+4,:] = colors[0]
+              frame0 = frame1
+              # frame1[:,0:offset+4,:] = colors[0]
               count += 1
               offset += 4
               squared = True
+              pause = 10
             else:
-              frame1[:,offset+4:offset+8,:] = colors[1]
+              frame0 = frame1
+              frame1[:,offset+4:offset+8,:] = colors[square % 8]
               count += 1
               offset += 4 
         
@@ -121,7 +138,7 @@ if __name__ == "__main__":
     parser.add_argument( '-v', '--verbose', action='store_true', help='Enable more detailed output.' )
     parser.add_argument( '-l', '--length', type=int, default=480, help='Number of frames to generate (at 30 fps)')
     parser.add_argument( '-t', '--tempo', type=float, default=30.0, help='Tempo of key frames in beats per minute.')
-    parser.add_argument( 'basename', default='perfect_squares', nargs='?', help='Base name of output file (not including .mp4 extension).')
+    parser.add_argument( 'basename', default='perfect_squares_part2', nargs='?', help='Base name of output file (not including .mp4 extension).')
 
     args = parser.parse_args()
     write_video_file(args.basename, args.length, args.verbose, args.tempo)
