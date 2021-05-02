@@ -57,11 +57,11 @@ def frame_generator(verbose, tempo):
 
     # Fill the frames with the first two colors.
    
-    frame0[:,0:8,:] = colors[0]
-    frame0[:,8:12,:] = colors[0]
+    frame0[:,0:32,:] = colors[0]
+    frame0[:,32:36,:] = colors[0]
     frame1 = frame0
-    frame1[:,12:16,:] = colors[1]
-    offset = 12
+    frame1[:,36:40,:] = colors[1]
+    offset = 36
     squared = False
     pause = 0
     
