@@ -48,7 +48,7 @@ def frame_generator(verbose, tempo):
     keyframe_phase = 0.0  # unit phase for the cross-fade, cycles over 0 to 1
 
     frame_interval = 1.0 / frame_rate                       # seconds between video frames
-    keyframe_interval = 5.0 / tempo                        # seconds between key frames
+    keyframe_interval = 7.0 / tempo                        # seconds between key frames
     keyframe_rate = 1.0 / (frame_rate * keyframe_interval)  # phase / frame
 
     # Generate two frames to use as keyframes.
@@ -57,10 +57,11 @@ def frame_generator(verbose, tempo):
 
     # Fill the frames with the first two colors.
    
-    frame0[:,0:4,:] = colors[0]
+    frame0[:,0:8,:] = colors[0]
+    frame0[:,8:12,:] = colors[0]
     frame1 = frame0
-    frame1[:,4:8,:] = colors[1]
-    offset = 4
+    frame1[:,12:16,:] = colors[1]
+    offset = 12
     squared = False
     pause = 0
     
@@ -125,7 +126,7 @@ def write_video_file(basename, length, verbose, *args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = """Perfect square video generator for the Pausch Bridge.""")
     parser.add_argument( '-v', '--verbose', action='store_true', help='Enable more detailed output.' )
-    parser.add_argument( '-l', '--length', type=int, default=480, help='Number of frames to generate (at 30 fps)')
+    parser.add_argument( '-l', '--length', type=int, default=1200, help='Number of frames to generate (at 30 fps)')
     parser.add_argument( '-t', '--tempo', type=float, default=30.0, help='Tempo of key frames in beats per minute.')
     parser.add_argument( 'basename', default='perfect_squares_part1', nargs='?', help='Base name of output file (not including .mp4 extension).')
 
