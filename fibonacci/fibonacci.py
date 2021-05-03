@@ -117,6 +117,7 @@ def frame_generator(verbose, input, tempo):
     #large = np.tile(bars, (1,copies,1))
 
     generated = 0
+    offset = generate_bkg(colors, 1, 0, 8)
     generating = bars_main
     width_generated = width_generated + bars_main.shape[1]
     background_count = ((frame_width - width_generated) // bars_width)
@@ -124,7 +125,7 @@ def frame_generator(verbose, input, tempo):
     background = generate_bkg(colors, 1, 0, background_count)
 
     #large = np.concatenate((generated,generating,background),axis=1)
-    large = np.concatenate((generating,background),axis=1)
+    large = np.concatenate((offset,generating,background),axis=1)
 
     generated = generating
 
@@ -147,6 +148,7 @@ def frame_generator(verbose, input, tempo):
         frame = cv.addWeighted(frame0, (1.0 - keyframe_phase), frame1, keyframe_phase, 0.0)
 
         # Advance the cross-fade phase.
+        keyframe_rate = 1 / (0.7 * fibonacci_sequence[-1] * frame_rate)
         keyframe_phase += keyframe_rate
 
         # Once the second keyframe is reached, generate the successor and reset the fade.
@@ -155,8 +157,9 @@ def frame_generator(verbose, input, tempo):
             frame0 = frame1
             #frame1 = large[0:frame_height, next_offset:frame_width+next_offset, :]
             #next_offset = (next_offset + 4) % bars_width
-            start_count = 0
-            large = bars_main
+            offset = generate_bkg(colors, row_count, 0, 8)
+            start_count = 9
+            large = np.concatenate((offset,bars_main),axis=1)
             for i in range(1,len(fibonacci_sequence)):
                 #space = np.tile(bars_bkg, (1,fibonacci_sequence[i],1))
                 space = generate_bkg(colors, row_count, start_count, fibonacci_sequence[i])
@@ -190,8 +193,12 @@ def frame_generator(verbose, input, tempo):
             fibonacci_sequence.append(fibonacci_sequence[-1] + fibonacci_sequence[-2])
 
             row_count += 1 #update row count
+        
+        offset_count = 32
 
-
+        for i in range(1,len(fibonacci_sequence)):
+            frame[0:8, offset_count:offset_count + 4, 0:4] = bars_main
+            offset_count += (4 + fibonacci_sequence[i]*4)
         
         # Return the frame and advance the generator state.
         yield frame
