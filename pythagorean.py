@@ -45,6 +45,7 @@ def random_color():
     r = random.randint(0,255)
     g = random.randint(0,255)
     b = random.randint(0,255)
+
     bgr = (b,g,r)
     return bgr
 
@@ -88,12 +89,12 @@ def frame_generator(verbose, tempo):
 
 
     frame0[:,:,:] = (255,255,255)
-    frame0[:, 0:block1,:] = color0
+    frame0[:, 8:block1 + 8,:] = color0
 
     frame1 = frame0
-    frame1[:,16:32,:] = color1
+    frame1[:,24:40,:] = color1
 
-    frame1[:,(block1 + offset):(block1 + offset + (side2 * offset)),:] = color1
+    frame1[:,(block1 + offset + 8):(block1 + offset + (side2 * offset) + 8),:] = color1
     
     while True:
         # Cross-fade between successive key frames at the given tempo.  This will
@@ -111,9 +112,9 @@ def frame_generator(verbose, tempo):
                 frame0[:,:,:] = (255,255,255)
                 frame1[:,:,:] = (255,255,255)
 
-                frame0[:,0:12,:] = color0
+                frame0[:,8:20,:] = color0
                 frame1 = frame0
-                frame1[:,16:32,:] = color1
+                frame1[:,24:40,:] = color1
 
                 restart = False
 
@@ -122,21 +123,21 @@ def frame_generator(verbose, tempo):
                 squared2 = (side2 ** 2) * offset
 
 
-                frame0[:,0:squared1,:] = color0
-                frame1[:,(squared1 + offset):((squared1 + offset) + squared2), :] = color1
+                frame0[:,8:squared1 + 8,:] = color0
+                frame1[:,(squared1 + offset + 8):((squared1 + offset + 8) + squared2), :] = color1
 
             
             if (pause == 20):
                 side3 = (side1 ** 2) + (side2 ** 2)
                 frame0[:,:,:] = (255,255,255)
                 frame1[:,:,:] = (255,255,255)
-                frame1[:, 0:side3*offset,:] = color2
+                frame1[:, 8:side3*offset + 8,:] = color2
 
 
             if (pause == 30):
                 side3 = int(side3 ** (1/2))
                 frame1[:,:,:] = (255,255,255)
-                frame1[:, 0:side3*offset,:] = color2
+                frame1[:, 8:side3*offset + 8,:] = color2
 
                 pause = 0
                 restart = True
