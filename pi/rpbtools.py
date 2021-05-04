@@ -30,7 +30,19 @@ def array2video(frames):
 
 
 def visualize_video(video):
-  pass
+  num_pixels = np.array([4,4,4,4,6,8,8,8,8,6,5,6] + [8]*35 + [6,5,8,8,8,8,8,8,4,8])
+  horizontal_sum = video[:,:,0::4,:] + video[:,:,1::4,:] + video[:,:,2::4,:] + video[:,:,3::4,:]
+  vertical_sum = np.sum(horizontal_sum, axis=1)
+  avg_video = vertical_sum[:,np.newaxis,:,:] / num_pixels[np.newaxis,np.newaxis,:,np.newaxis]
+  resized_video = np.repeat(np.repeat(avg_video, 10, axis=1), 4, axis=2)
+
+  fourcc = cv2.VideoWriter_fourcc(*'png ')
+  writer = cv2.VideoWriter('visualization.avi', fourcc, 30, (228,10))
+  resized_video = (resized_video*255).astype(np.uint8)
+  for frame in resized_video:
+    writer.write(frame[...,::-1])
+  writer.release()
+
 
 
 
