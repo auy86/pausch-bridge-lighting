@@ -99,6 +99,48 @@ def frame_generator(verbose, tempo):
         yield frame
         frame_time += frame_interval
 
+blank = ((0,0,0))
+def end_transition(verbose, input, lastframe, tempo):
+    count = 0                  # count of generated frames
+    frame_time = 0.0           # time stamp for generated frame in seconds
+    keyframe_phase = 0.0       # unit phase for the cross-fade, cycles over 0 to 1
+    fibonacci_sequence = [0,1] # for generating fibonacci number
+    width_generated = 0        # for tracking width generated
+
+    frame_interval = 1.0 / frame_rate                       # seconds between video frames
+    keyframe_interval = 60.0 / tempo                        # seconds between key frames
+    keyframe_rate = 1.0 / (frame_rate * keyframe_interval)  # phase / frame
+
+    blank_main = np.array(blank,dtype=np.uint8).reshape((1,1,3))
+    blank_bars = cv.resize(blank_main, None, fx=4, fy=8, interpolation=cv.INTER_NEAREST)
+
+    # Generate Frame 1 (blank)
+
+    bars_width = blank_bars.shape[1]
+    copies = (frame_width + bars_width) // bars_width   
+    large = np.tile(blank_bars, (1,copies,1))
+
+    frame0 = lastframe[0:frame_height, 0:frame_width, :]
+    frame1 = large[0:frame_height, 0:frame_width, :]
+    
+    while True:
+        # Cross-fade between successive key frames at the given tempo.  This will
+        # return a new frame of integer pixels.
+        frame = cv.addWeighted(frame0, (1.0 - keyframe_phase), frame1, keyframe_phase, 0.0)
+
+        # Advance the cross-fade phase.
+        keyframe_rate = 1 / (5 * frame_rate)
+        keyframe_phase += keyframe_rate
+
+        # Once keyframe is reached, return null.
+        if keyframe_phase >= 1.0:
+            yield
+        
+        # Return the frame and advance the generator state.
+        yield frame
+        count += 1
+        frame_time += frame_interval
+
 #================================================================
 # Write a video file in the default format.
 
@@ -117,6 +159,16 @@ def write_video_file(basename, length, verbose, *args):
     # Synthesize some frames and write them to the stream.
     for count in range(length):
         out.write(next(frame_sequence))
+
+    #Adding End Transition
+    end_sequence = end_transition(verbose, input, next(frame_sequence), *args)
+
+    while True:
+        next_frame = next(end_sequence)
+        if next_frame is None:
+            break
+        else:
+            out.write(next_frame)
 
     # Release everything when done.
     out.release()
