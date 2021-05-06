@@ -89,12 +89,12 @@ def frame_generator(verbose, tempo):
 
 
     frame0[:,:,:] = (255,255,255)
-    frame0[:, 8:block1 + 8,:] = color0
+    frame0[:, 32:block1 + 32,:] = color0
 
     frame1 = frame0
-    frame1[:,24:40,:] = color1
+    frame1[:,48:64,:] = color1
 
-    frame1[:,(block1 + offset + 8):(block1 + offset + (side2 * offset) + 8),:] = color1
+    frame1[:,(block1 + offset + 32):(block1 + offset + (side2 * offset) + 8),:] = color1
     
     while True:
         # Cross-fade between successive key frames at the given tempo.  This will
@@ -112,9 +112,9 @@ def frame_generator(verbose, tempo):
                 frame0[:,:,:] = (255,255,255)
                 frame1[:,:,:] = (255,255,255)
 
-                frame0[:,8:20,:] = color0
+                frame0[:,32:44,:] = color0
                 frame1 = frame0
-                frame1[:,24:40,:] = color1
+                frame1[:,48:64,:] = color1
 
                 restart = False
 
@@ -123,21 +123,21 @@ def frame_generator(verbose, tempo):
                 squared2 = (side2 ** 2) * offset
 
 
-                frame0[:,8:squared1 + 8,:] = color0
-                frame1[:,(squared1 + offset + 8):((squared1 + offset + 8) + squared2), :] = color1
+                frame0[:,32:squared1 + 32,:] = color0
+                frame1[:,(squared1 + offset + 32):((squared1 + offset + 32) + squared2), :] = color1
 
             
             if (pause == 20):
                 side3 = (side1 ** 2) + (side2 ** 2)
                 frame0[:,:,:] = (255,255,255)
                 frame1[:,:,:] = (255,255,255)
-                frame1[:, 8:side3*offset + 8,:] = color2
+                frame1[:, 32:side3*offset + 32,:] = color2
 
 
             if (pause == 30):
                 side3 = int(side3 ** (1/2))
                 frame1[:,:,:] = (255,255,255)
-                frame1[:, 8:side3*offset + 8,:] = color2
+                frame1[:, 32:side3*offset + 32,:] = color2
 
                 pause = 0
                 restart = True
